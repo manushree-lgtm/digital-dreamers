@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="portal">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeShift Portal — Temporal Log</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Courier+Prime&family=Inter:wght@300;400;700&family=Orbitron:wght@700;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= 1. DYNAMIC COLOR WORLDS & TYPOGRAPHY ================= */
+        [data-theme="portal"] {
+            --world-bg: #000000; --world-text: #ffffff; --world-accent: #39FF14; --world-font: 'Inter', sans-serif;
+        }
+        [data-theme="era-1"] { /* Ancient Egypt (Sand/Gold/Serif) */
+            --world-bg: #2b1d0c; --world-text: #f4e1c1; --world-accent: #FFD700; --world-font: 'Cinzel', serif;
+        }
+        [data-theme="era-2"] { /* Medieval (Gothic Calligraphy/Crimson) */
+            --world-bg: #110d12; --world-text: #d1c7bd; --world-accent: #b60000; --world-font: 'UnifrakturMaguntia', serif;
+        }
+        [data-theme="era-3"] { /* Industrial (Typewriter/Copper) */
+            --world-bg: #221a14; --world-text: #e3dcd5; --world-accent: #d27d2d; --world-font: 'Courier Prime', monospace;
+        }
+        [data-theme="era-4"] { /* Present 2026 (Modern Tech/Electric Blue) */
+            --world-bg: #0d1117; --world-text: #c9d1d9; --world-accent: #0070F3; --world-font: 'Inter', sans-serif;
+        }
+        [data-theme="era-5"] { /* Far Future (Geometric/Holographic Cyan) */
+            --world-bg: #050014; --world-text: #e0d7ff; --world-accent: #00F5D4; --world-font: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background-color: var(--world-bg);
+            color: var(--world-text);
+            font-family: var(--world-font);
+            transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1), color 0.8s;
+            overflow-x: hidden;
+        }
+
+        .accent-text { color: var(--world-accent); }
+        .accent-border { border-color: var(--world-accent); }
+        
+        /* ================= 2. GLITCH OVERLAY SYSTEM ================= */
+        #glitch-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+        }
+        .glitch-bar {
+            position: absolute;
+            width: 100%;
+            background: repeating-linear-gradient(90deg, #ff0055 0%, #00ffaa 50%, #0055ff 100%);
+            opacity: 0.3;
+            animation: glitch-anim 0.1s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { top: 10%; height: 5px; min-width: 100%; }
+            100% { top: 80%; height: 40px; min-width: 100%; }
+        }
+
+        .glitch-hover:hover {
+            text-shadow: 2px 0 var(--world-accent), -2px 0 #ff0055;
+        }
+
+        /* App States Toggle */
+        .page-state { display: none; }
+        .page-state.active { display: flex; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-6 relative select-none">
+
+    <canvas id="temporal-particles" class="absolute inset-0 pointer-events-none z-0"></canvas>
+
+    <div id="glitch-overlay">
+        <div class="glitch-bar" style="animation-delay: 0.05s; top: 30%"></div>
+        <div class="glitch-bar" style="animation-delay: 0.15s; top: 65%"></div>
+    </div>
+
+    <header class="w-full flex justify-between items-center z-10 border-b border-gray-800/40 pb-4">
+        <div class="text-[10px] tracking-widest uppercase opacity-60">SYSTEM: ONLINE // MULTI_THREAD_PORTAL</div>
+        <div id="chronometer" class="text-sm md:text-base font-bold accent-text tracking-wider">SYSTEM TIME: 20.06.2026</div>
+    </header>
+
+    <main id="view-portal" class="page-state active flex-col items-center justify-center text-center flex-1 z-10 max-w-4xl mx-auto w-full my-6">
+        <div class="w-full mb-6 rounded-lg overflow-hidden border accent-border bg-black/40 shadow-2xl">
+            <img src="manu1.jpeg" alt="TimeShift Portal Poster" class="w-full h-auto object-cover block mx-auto">
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tighter mb-2 glitch-hover cursor-default transition-all">T I M E S H I F T _ P O R T A L</h1>
+        <p class="text-xs md:text-sm tracking-widest opacity-80 mb-6 uppercase">You are about to leave your timeline.</p>
+
+        <div class="w-full max-w-xl mb-6 p-4 rounded bg-neutral-900/80 border border-gray-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-left backdrop-blur-sm">
+            <div class="flex flex-col">
+                <span class="text-xs font-bold uppercase tracking-wider accent-text">🎵 Lyria Music Stream</span>
+                <span class="text-[11px] opacity-60 mt-0.5">Chronal Link: Active Soundscape Synthesis</span>
+            </div>
+            <audio id="lyria-player" controls class="h-8 opacity-90 accent-emerald-500 w-full sm:w-auto">
+                <source src="manu_audio.mp3" type="audio/mpeg">
+                Temporal audio streaming unsupported by destination browser environment.
+            </audio>
+        </div>
+
+        <button onclick="switchView('view-selector')" class="px-8 py-4 border accent-border accent-text font-bold tracking-widest bg-black/40 backdrop-blur-sm transition uppercase text-sm glitch-hover mb-10">
+            Initialize Dial // Choose Your Era
+        </button>
+
+        <div class="w-full text-left bg-neutral-950/90 border border-gray-900 p-6 rounded-lg shadow-xl backdrop-blur-sm">
+            <h2 class="text-lg font-bold tracking-wider accent-text mb-4 uppercase border-b border-gray-900 pb-2 flex items-center gap-2">
+                📂 Chronological Event File: "Anomalous Deployment"
+            </h2>
+            
+            <div class="space-y-4 text-xs md:text-sm leading-relaxed text-gray-300">
+                <div>
+                    <h3 class="font-bold text-white uppercase tracking-wider text-xs">// 📖 The Story</h3>
+                    <p class="italic border-l-2 accent-border pl-3 mt-1 text-gray-400 font-mono">
+                        "In 2026, three students were building a normal college website. But when they pushed their code to GitHub, something went terribly wrong — or terribly right."
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-amber-500 uppercase tracking-wider text-xs">// ⚡ The Accident</h3>
+                    <p class="mt-1">
+                        Your team was simply attempting to finish a standard web development assignment. However, an unexpected structural conflict occurred when one member inadvertently configured custom <strong class="text-white font-mono">quantum routing code algorithms</strong> directly into standard HTML layouts. The microsecond the app repository was deployed onto the live hosting platform, the server node tore a physical breach directly through the digital fabric of our temporal plane.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-cyan-400 uppercase tracking-wider text-xs">// 🌀 The Discovery</h3>
+                    <p class="mt-1">
+                        End-users navigating across ordinary pages unexpectedly began physical-feedback translations, safely <em class="text-white">experiencing</em> target environments and divergent eras directly rather than processing written documents. The live production server had organically converted into an operating, multi-threaded <strong class="text-white">living time machine</strong>.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-rose-500 uppercase tracking-wider text-xs">// 🔐 The Secret</h3>
+                    <p class="mt-1">
+                        The deployment can no longer be systematically modified or brought offline. Standard administrative commands, directory wipes, or repository terminations fail immediately; the runtime footprint has duplicated and embedded itself permanently across <strong class="text-white">all human timelines concurrently</strong>.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-xs">// 📡 The Mission</h3>
+                    <p class="mt-1">
+                        Accepting their fate, the development squad transitioned operations from basic programming to direct historic preservation. They are now officially organized as the world's first <strong class="text-white">accidental time travel journalists</strong>. This interface serves as their active archival grid.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-900">
+                <div class="mb-4">
+                    <span class="text-xs font-mono tracking-widest text-white/40 uppercase block">TEAM SIGNATURE</span>
+                    <h2 class="text-xl md:text-2xl font-black tracking-widest text-white uppercase glitch-hover inline-block">
+                        ⚡ Digital Dreamers
+                    </h2>
+                </div>
+                
+                <h3 class="text-[10px] font-mono tracking-widest accent-text uppercase mb-3">// TEMPORAL AGENTS IDENTIFIED</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 bg-black/60 border border-gray-900 rounded-lg backdrop-blur-xs relative group hover:border-gray-700 transition-colors">
+                        <div class="absolute top-2 right-3 font-mono text-[9px] opacity-30 text-white tracking-widest">LEADER</div>
+                        <div class="text-[10px] accent-text font-mono tracking-widest font-bold mb-1">TEAM LEADER</div>
+                        <div class="text-base font-bold text-white tracking-tight mb-2">Afrathul Fazila</div>
+                        <div class="text-xs text-gray-400 font-mono border-t border-gray-900/60 pt-2">
+                            <span class="opacity-40">ROLE:</span> HTML & Website Development
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-black/60 border border-gray-900 rounded-lg backdrop-blur-xs relative group hover:border-gray-700 transition-colors">
+                        <div class="absolute top-2 right-3 font-mono text-[9px] opacity-30 text-white tracking-widest">AGENT_01</div>
+                        <div class="text-[10px] accent-text font-mono tracking-widest font-bold mb-1">MEMBER</div>
+                        <div class="text-base font-bold text-white tracking-tight mb-2">Manushree</div>
+                        <div class="text-xs text-gray-400 font-mono border-t border-gray-900/60 pt-2">
+                            <span class="opacity-40">ROLE:</span> Content, Poster, Lyria Music Track
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="view-selector" class="page-state flex-col items-center justify-center text-center flex-1 z-10 my-auto w-full">
+        <h2 class="text-xl tracking-widest uppercase mb-12 accent-text font-bold">// Select Destinational Vector</h2>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 max-w-6xl w-full px-4">
+            <div onclick="travelToEra('era-1', '3000 BC')" class="border border-gray-800 p-6 rounded cursor-pointer bg-neutral-900/20 backdrop-blur-sm transition-all hover:scale-105">
+                <h3 class="text-2xl font-bold mb-2">3000 BC</h3>
+                <p class="text-xs opacity-70">Ancient Nile Matrix Architecture</p>
+            </div>
+            <div onclick="travelToEra('era-2', '1200 AD')" class="border border-gray-800 p-6 rounded cursor-pointer bg-neutral-900/20 backdrop-blur-sm transition-all hover:scale-105">
+                <h3 class="text-2xl font-bold mb-2">1200 AD</h3>
+                <p class="text-xs opacity-70">Forbidden Medieval Technology Orders</p>
+            </div>
+            <div onclick="travelToEra('era-3', '1880s')" class="border border-gray-800 p-6 rounded cursor-pointer bg-neutral-900/20 backdrop-blur-sm transition-all hover:scale-105">
+                <h3 class="text-2xl font-bold mb-2">1880s</h3>
+                <p class="text-xs opacity-70">Mechanical Steam Computation Layouts</p>
+            </div>
+            <div onclick="travelToEra('era-4', '2026 AD')" class="border border-gray-800 p-6 rounded cursor-pointer bg-neutral-900/20 backdrop-blur-sm transition-all hover:scale-105">
+                <h3 class="text-2xl font-bold mb-2">2026 AD</h3>
+                <p class="text-xs opacity-70">The Baseline Dev Laboratory Nightmare</p>
+            </div>
+            <div onclick="travelToEra('era-5', '3000 AD')" class="border border-gray-800 p-6 rounded cursor-pointer bg-neutral-900/20 backdrop-blur-sm transition-all hover:scale-105">
+                <h3 class="text-2xl font-bold mb-2">3000 AD</h3>
+                <p class="text-xs opacity-70">Post-Biological Digital Mainframe Hub</p>
+            </div>
+        </div>
+        <button onclick="switchView('view-portal')" class="mt-8 px-5 py-2 border border-neutral-900 text-[10px] tracking-widest uppercase opacity-50 hover:opacity-100 hover:border-neutral-700 transition">
+            &larr; Back to Terminal Mainframe
+        </button>
+    </main>
+
+    <main id="view-era" class="page-state flex-col items-center justify-center flex-1 z-10 my-auto max-w-4xl mx-auto w-full px-4">
+        <div class="border accent-border p-8 bg-black/60 backdrop-blur-md rounded-lg w-full relative shadow-2xl">
+            <div id="era-tagline" class="text-xs tracking-widest uppercase accent-text mb-2"></div>
+            <h2 id="era-title" class="text-3xl md:text-5xl font-bold mb-6"></h2>
+            <hr class="border-gray-800/60 mb-6">
+            <p id="era-story" class="text-base md:text-lg leading-relaxed mb-8 opacity-90"></p>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="switchView('view-selector')" class="px-6 py-2 border accent-border accent-text text-sm tracking-wider uppercase font-bold bg-black/40 hover:bg-white hover:text-black transition">
+                    &larr; Readjust Dial
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full flex justify-between items-center text-[9px] tracking-wider opacity-40 z-10 border-t border-gray-900 pt-4 mt-8">
+        <div>CORE REPOSITORY v2.0.0</div>
+        <div>"EVERY ERA. ONE PORTAL. NO WAY BACK."</div>
+    </footer>
+
+    <script>
+        const eraData = {
+            'era-1': { title: "3000 BC // Ancient Egypt", tagline: "They built wonders. We finally know how.", story: "Our team lands directly in the desert dust of ancient Egypt. The pyramids aren't being built by manual leverage alone—we saw copper-clad priests operating heavy mechanical configurations running on basic algorithmic patterns." },
+            'era-2': { title: "1200 AD // High Middle Ages", tagline: "They knew too much for their time.", story: "Deep within a sealed stone chamber in a fortress wall, we discovered a cryptic, hand-written order of monastic scholars. They weren't copying bibles; they were documenting integrated circuitry layouts using primitive materials." },
+            'era-3': { title: "1880s // Industrial Revolution", tagline: "He invented the future. Nobody believed him.", story: "We sat down for tea with a Victorian engineer working amidst heavy brass gears and coal smog. He showed us detailed, steam-powered mechanical blueprinted concepts for what amounts to a modern 64-bit computing engine." },
+            'era-4': { title: "2026 AD // The Baseline Present", tagline: "This is where we broke time.", story: "Back in our cold university workspace. Empty energy drinks, messy node_modules files, and a terminal cursor blinking continuously. This is the zero-hour event framework where a simple deployment command tore open the fabric of the digital grid." },
+            'era-5': { title: "3000 AD // Post-Human Web", tagline: "They were expecting us. They always knew we'd come.", story: "The physical world is completely void. Humanity transitioned away from physical biological components, surviving as structured data loops inside massive orbital mainframe hubs. They'd been keeping the server running for a thousand years." }
+        };
+
+        function switchView(viewId, targetTheme = 'portal') {
+            const overlay = document.getElementById('glitch-overlay');
+            overlay.style.display = 'block';
+
+            setTimeout(() => {
+                document.querySelectorAll('.page-state').forEach(p => p.classList.remove('active'));
+                document.getElementById(viewId).classList.add('active');
+                
+                document.documentElement.setAttribute('data-theme', targetTheme);
+                if (targetTheme === 'portal') {
+                    document.getElementById('chronometer').innerText = "SYSTEM TIME: 20.06.2026";
+                    initParticleEngine('portal');
+                }
+            }, 300);
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 550);
+        }
+
+        function travelToEra(eraKey, timestampLabel) {
+            document.getElementById('era-title').innerText = eraData[eraKey].title;
+            document.getElementById('era-tagline').innerText = eraData[eraKey].tagline;
+            document.getElementById('era-story').innerText = eraData[eraKey].story;
+            document.getElementById('chronometer').innerText = `TEMPORAL ANCHOR: ${timestampLabel}`;
+            
+            switchView('view-era', eraKey);
+            initParticleEngine(eraKey);
+        }
+
+        // Canvas Ambient Particle System Definitions
+        const canvas = document.getElementById('temporal-particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let activeAnimationLoop;
+        let currentEraType = 'portal';
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(type) {
+                this.type = type;
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = '#39FF14';
+
+                if (this.type === 'era-1') { 
+                    this.color = '#FFD700';
+                    this.speedX = Math.random() * 1.5 + 0.5;
+                    this.speedY = Math.random() * 0.2 - 0.1;
+                } else if (this.type === 'era-2') { 
+                    this.color = '#ff3700';
+                    this.speedY = Math.random() * -1 - 0.5;
+                } else if (this.type === 'era-3') { 
+                    this.color = '#B87333';
+                    this.size = Math.random() * 6 + 2;
+                    this.speedY = Math.random() * -0.8 - 0.2;
+                } else if (this.type === 'era-4') {
+                    this.color = '#0070F3';
+                } else if (this.type === 'era-5') { 
+                    this.x = canvas.width / 2;
+                    this.y = canvas.height / 2;
+                    let angle = Math.random() * Math.PI * 2;
+                    let speed = Math.random() * 5 + 2;
+                    this.speedX = Math.cos(angle) * speed;
+                    this.speedY = Math.sin(angle) * speed;
+                }
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                this.reset();
+            }
+        }
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initParticleEngine(type) {
+        cancelAnimationFrame(activeAnimationLoop);
+        particles = [];
+        for (let i = 0; i < 60; i++) {
+            particles.push(new Particle(type));
+        }
+        animate();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        activeAnimationLoop = requestAnimationFrame(animate);
+    }
+
+    // Initialize default portal particles on load
+    initParticleEngine('portal');
+</script>
+</body>
+</html>
